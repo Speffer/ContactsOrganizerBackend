@@ -1,5 +1,6 @@
 from db import db
 import json
+from flask import jsonify
 from sqlalchemy.sql import func
 from sqlalchemy import DateTime
 
@@ -15,31 +16,37 @@ class ContactModel(db.Model):
     created_at = db.Column(DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, company, company_id, phones):
+    def __init__(self, name, company_id):
         self.name = name
-        self.company = company
         self.company_id = company_id
-        self.phones = phones
 
     def json(self):
+        phones = []
+        for p in self.phones:
+            phones.append(p.json())
+
         return {
             'name': self.name,
-            'company': self.company,
+            'company': self.company.json(),
             'id': self.id,
             'created_at': json.dumps(self.created_at, default=str),
             'updated_at': json.dumps(self.created_at, default=str) if self.updated_at is None else json.dumps(self.updated_at, default=str),
-            'phones': self.phones
+            'phones': phones
         }
     
     @property
     def all_json(self):
+        phones = []
+        for p in self.phones:
+            phones.append(p.json())
+
         return {
             'name': self.name,
-            'company': self.company,
+            'company': self.company.json(),
             'id': self.id,
             'created_at': json.dumps(self.created_at, default=str),
             'updated_at': json.dumps(self.created_at, default=str) if self.updated_at is None else json.dumps(self.updated_at, default=str),
-            'phones': self.phones
+            'phones': phones
         }
 
     @classmethod
@@ -69,10 +76,9 @@ class PhoneModel(db.Model):
     created_at = db.Column(DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, number, contact_id, contact):
+    def __init__(self, number, contact_id):
         self.number = number
         self.contact_id = contact_id
-        self.contact = contact
 
     def json(self):
         return {
@@ -81,12 +87,25 @@ class PhoneModel(db.Model):
             'id': self.id,
             'created_at': json.dumps(self.created_at, default=str),
             'updated_at': json.dumps(self.created_at, default=str) if self.updated_at is None else json.dumps(self.updated_at, default=str),
-            'contact': self.contact
+        }
+
+    @property
+    def all_json(self):
+        return {
+            'number': self.number,
+            'contact_id': self.contact_id,
+            'id': self.id,
+            'created_at': json.dumps(self.created_at, default=str),
+            'updated_at': json.dumps(self.created_at, default=str) if self.updated_at is None else json.dumps(self.updated_at, default=str),
         }
 
     @classmethod
     def get_by_id(cls, id):
         return cls.query.filter_by(id=id).first()
+
+    @classmethod
+    def get_by_contact_id(cls, id):
+        return cls.query.filter_by(contact_id=id).all()
 
     @classmethod
     def get_all(cls):
