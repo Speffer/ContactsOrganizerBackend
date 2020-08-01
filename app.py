@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from flask_restful import Api
 from flask_migrate import Migrate
-from flask_json import FlaskJSON
+from flask_cors import CORS
 
 from db import db
 from resources.company import Company, CompanyById, CompanyType
@@ -13,7 +13,7 @@ from models.contact import ContactModel, PhoneModel
 
 app = Flask(__name__)
 api = Api(app)
-json = FlaskJSON(app)
+CORS(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 DB_URL = 'sqlite:///' + os.path.join(basedir, 'data.db')

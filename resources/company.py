@@ -1,6 +1,5 @@
 from flask_restful import Resource, reqparse, inputs
 from models.company import CompanyModel, CompanyPFModel, CompanyPJModel
-from flask_json import json_response, as_json
 from flask import jsonify
 import json
 
@@ -43,7 +42,7 @@ class CompanyById(Resource):
     parser.add_argument(
         'birthday',
         nullable=True,
-        type=inputs.datetime
+        type=inputs.datetime.fromisoformat
     )
 
     def get(self, id):
@@ -128,7 +127,7 @@ class Company(Resource):
     parser.add_argument(
         'birthday',
         nullable=True,
-        type=inputs.datetime
+        type=inputs.datetime.fromisoformat
     )
 
     def get(self):

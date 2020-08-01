@@ -77,7 +77,8 @@ class CompanyPJModel(db.Model):
             'id': self.id,
             'created_at': json.dumps(self.created_at, default=str),
             'updated_at': json.dumps(self.created_at, default=str) if self.updated_at is None else json.dumps(self.updated_at, default=str),
-            'company_id': self.company_id
+            'company_id': self.company_id,
+            'company': self.company.json()
         }
 
     @property
@@ -88,7 +89,8 @@ class CompanyPJModel(db.Model):
             'created_at': json.dumps(self.created_at, default=str),
             'updated_at': json.dumps(self.created_at, default=str) if self.updated_at is None else json.dumps(self.updated_at, default=str),
             'company': self.company,
-            'company_id': self.company_id
+            'company_id': self.company_id,
+            'company': self.company.json()
         }
 
     @classmethod
@@ -123,16 +125,16 @@ class CompanyPFModel(db.Model):
     created_at = db.Column(DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, company_id, document, rg, birthday):
+    def __init__(self, company_id, rg, birthday):
         self.company_id = company_id
-        self.document = document
         self.rg = rg
         self.birthday = birthday
 
     def json(self):
         return {
+            'company': self.company.json(),
             'company_id': self.company_id,
-            'birthday': json.dumps(self.created_at, default=str),
+            'birthday': json.dumps(self.birthday, default=str),
             'rg': self.rg,
             'id': self.id,
             'created_at': json.dumps(self.created_at, default=str),
@@ -142,9 +144,9 @@ class CompanyPFModel(db.Model):
     @property
     def all_json(self):
         return {
+            'company': self.company.json(),
             'company_id': self.company_id,
-            'company': self.company,
-            'birthday': json.dumps(self.created_at, default=str),
+            'birthday': json.dumps(self.birthday, default=str),
             'rg': self.rg,
             'id': self.id,
             'created_at': json.dumps(self.created_at, default=str),
