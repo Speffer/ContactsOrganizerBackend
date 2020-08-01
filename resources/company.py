@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse, inputs
 from models.company import CompanyModel, CompanyPFModel, CompanyPJModel
-from flask import jsonify
+from flask import jsonify, request
 import json
 
 class CompanyType(Resource):
@@ -20,31 +20,6 @@ class CompanyType(Resource):
         return {'message': 'Company not found'}, 404
 
 class CompanyById(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument(
-        'name',
-        required=True,
-        help="Empty name field"
-    )
-    parser.add_argument(
-        'city',
-        required=True,
-        help="Empty city field"
-    )
-    parser.add_argument(
-        'fantasy_name',
-        nullable=True,
-    )
-    parser.add_argument(
-        'rg',
-        nullable=True,
-    )
-    parser.add_argument(
-        'birthday',
-        nullable=True,
-        type=inputs.datetime.fromisoformat
-    )
-
     def get(self, id):
         company = CompanyModel.get_by_id(id)
         if company:
@@ -52,20 +27,27 @@ class CompanyById(Resource):
         return {'message': 'Company not found'}, 404
     
     def put(self, id):
-        data = Company.parser.parse_args()
+        data = request.get_json()
 
         company = CompanyModel.get_by_id(id)
-        company.city = data['city']
-        company.name = data['name']
+
+        if 'city' in data:
+            company.city = data['city']
+
+        if 'name' in data:
+            company.name = data['name']
         
-        if len(company.document) == 13:
+        if len(company.document) == 13 and 'fantasy_name' in data:
             company_pj = CompanyPJModel.get_by_company_id(company.id)
-            company_pj.fantasy_name = data["fantasy_name"]
+            company_pj.fantasy_name = data['fantasy_name']
 
         elif len(company.document) == 11:
             company_pf = CompanyPFModel.get_by_company_id(company.id)
-            company_pf.rg = data["rg"]
-            company_pf.birthday = data["birthday"]
+            if 'rg' in data:
+                company_pf.rg = data['rg']
+            
+            if 'birthday' in data:
+                company_pf.birthday = data['birthday']
         
         else:
             return {"message": "Document value is invalid."}, 400

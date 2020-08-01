@@ -28,6 +28,7 @@ class ContactModel(db.Model):
         return {
             'name': self.name,
             'company': self.company.json(),
+            'company_id': self.company_id,
             'id': self.id,
             'created_at': json.dumps(self.created_at, default=str),
             'updated_at': json.dumps(self.created_at, default=str) if self.updated_at is None else json.dumps(self.updated_at, default=str),
@@ -43,6 +44,7 @@ class ContactModel(db.Model):
         return {
             'name': self.name,
             'company': self.company.json(),
+            'company_id': self.company_id,
             'id': self.id,
             'created_at': json.dumps(self.created_at, default=str),
             'updated_at': json.dumps(self.created_at, default=str) if self.updated_at is None else json.dumps(self.updated_at, default=str),

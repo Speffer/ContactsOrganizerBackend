@@ -1,51 +1,37 @@
 from flask_restful import Resource, reqparse
-from flask import jsonify
+from flask import jsonify, request
 import json
 from models.company import CompanyModel, CompanyPFModel, CompanyPJModel
 from models.contact import ContactModel, PhoneModel
 
 class ContactById(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument(
-        'name',
-        required=True,
-        help="Empty name field"
-    )
-    parser.add_argument(
-        'company_id',
-        required=True,
-        help="Empty company_id field",
-        type=int
-    )
-    parser.add_argument(
-        'phones',
-        required=True,
-        help="Empty phones field",
-        action='append'
-    )
-
     def put(self, id):
-        data = Contact.parser.parse_args()
+        data = request.get_json()
         contact = ContactModel.get_by_id(id)
 
         if contact: 
-            contact.company_id = data['company_id']
-            contact.name = data['name']
-            phones = PhoneModel.get_by_contact_id(contact.id)
+            if 'company_id' in data:
+                contact.company_id = data['company_id']
 
-            for index, number in enumerate(data['phones']):
-                if number != phones[index].number and contact.id == phones[index].contact_id:
-                    phone_obj = {
-                        'number': number,
-                        'contact_id': contact.id
-                    }
-                    new_phone = PhoneModel(**phone_obj)
-                    
-                    try: 
-                        new_phone.save()
+            if 'name' in data:
+                contact.name = data['name']
 
-                    except:
-                        return {"message": "An error occurred inserting the phone."}, 500
+            if 'phones' in data and len(data['phones']) > 0:
+                phones = PhoneModel.get_by_contact_id(contact.id)
+
+                for index, number in enumerate(data['phones']):
+                    if number != phones[index].number and contact.id == phones[index].contact_id:
+                        phone_obj = {
+                            'number': number,
+                            'contact_id': contact.id
+                        }
+                        new_phone = PhoneModel(**phone_obj)
+                        
+                        try: 
+                            new_phone.save()
+
+                        except:
+                            return {"message": "An error occurred inserting the phone."}, 500
 
             try:
                 contact.save()
