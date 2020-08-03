@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse, inputs
 from models.company import CompanyModel, CompanyPFModel, CompanyPJModel
+from models.contact import ContactModel, PhoneModel
 from flask import jsonify, request
 import json
 
@@ -8,7 +9,7 @@ class CompanyType(Resource):
         company = CompanyModel.get_by_id(id)
         
         if company:
-            if len(company.document) == 13:
+            if len(company.document) == 14:
                 company_pj = CompanyPJModel.get_by_company_id(company.id)
                 return company_pj.json(), 200
 
@@ -37,7 +38,7 @@ class CompanyById(Resource):
         if 'name' in data:
             company.name = data['name']
         
-        if len(company.document) == 13 and 'fantasy_name' in data:
+        if len(company.document) == 14 and 'fantasy_name' in data:
             company_pj = CompanyPJModel.get_by_company_id(company.id)
             company_pj.fantasy_name = data['fantasy_name']
 
@@ -54,7 +55,7 @@ class CompanyById(Resource):
         
         try:
             company.save()
-            if len(company.document) == 13: company_pj.save()
+            if len(company.document) == 14: company_pj.save()
             elif len(company.document) == 11: company_pf.save()
         
         except:
@@ -64,8 +65,17 @@ class CompanyById(Resource):
     
     def delete(self, id):
         company = CompanyModel.get_by_id(id)
+        contacts = ContactModel.get_by_company_id(id)
+
         if company:
-            if len(company.document) == 13:
+            for contact in contacts:
+                for phone_obj in contact.phones:
+                    phone = PhoneModel.get_by_id(phone_obj.id)
+                    phone.delete()
+
+                contact.delete()
+
+            if len(company.document) == 14:
                 company_pj = CompanyPJModel.get_by_company_id(id)
                 if company_pj:
                     company_pj.delete()
@@ -132,7 +142,7 @@ class Company(Resource):
         try:
             company.save()
 
-            if len(company.document) == 13:
+            if len(company.document) == 14:
                 pj_obg = {
                     "fantasy_name": data["fantasy_name"],
                     "company_id": company.id

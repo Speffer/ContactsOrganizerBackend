@@ -56,6 +56,10 @@ class ContactModel(db.Model):
         return cls.query.filter_by(id=id).first()
 
     @classmethod
+    def get_by_company_id(cls, id):
+        return cls.query.filter_by(company_id=id).all()
+
+    @classmethod
     def get_all(cls):
         return cls.query.all()
 
